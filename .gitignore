@@ -12,6 +12,7 @@ captures/
 *.class
 app/debug/
 app/release/
+/android-sdk/
 
 # vscode / eclipse files
 *.classpath
