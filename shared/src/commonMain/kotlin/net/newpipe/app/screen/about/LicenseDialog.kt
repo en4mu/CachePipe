@@ -91,8 +91,8 @@ fun LicenseDialog(
 private fun LicenseDialogPreview() {
     LicenseDialog(
         license = License(
-            name = "NewPipe",
-            website = "https://newpipe.net/",
+            name = "CachePipe",
+            website = "https://github.com/en4mu/CachePipe",
             spdxID = "GPL-3.0-or-later"
         )
     )

@@ -6,7 +6,7 @@
 package net.newpipe.app
 
 object Constants {
-    const val URL_GITHUB = "https://github.com/TeamNewPipe/NewPipe"
+    const val URL_GITHUB = "https://github.com/en4mu/CachePipe"
     const val URL_DONATION = "https://newpipe.net/donate/"
     const val URL_WEBSITE = "https://newpipe.net/"
     const val URL_PRIVACY = "https://newpipe.net/legal/privacy/"

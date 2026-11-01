@@ -42,6 +42,7 @@ import net.newpipe.app.theme.spaceLarge
 import net.newpipe.app.theme.spaceXSmall
 import net.newpipe.app.theme.spaceXXSmall
 import newpipe.shared.generated.resources.Res
+import newpipe.shared.generated.resources.app_based_on
 import newpipe.shared.generated.resources.app_description
 import newpipe.shared.generated.resources.contribution_encouragement
 import newpipe.shared.generated.resources.contribution_title
@@ -110,6 +111,12 @@ fun AboutPageContent(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(Res.string.app_description),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.app_based_on),
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
             }

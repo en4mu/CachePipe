@@ -91,7 +91,7 @@ public class BackupRestoreSettingsFragment extends BasePreferenceFragment {
             NoFileManagerSafeGuard.launchSafe(
                     requestExportPathLauncher,
                     StoredFileHelper.getNewPicker(requireContext(),
-                            "NewPipeData-" + exportDateFormat.format(new Date()) + ".zip",
+                            "CachePipeData-" + exportDateFormat.format(new Date()) + ".zip",
                             ZIP_MIME_TYPE, getImportExportDataUri()),
                     TAG,
                     getContext()

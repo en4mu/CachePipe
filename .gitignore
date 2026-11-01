@@ -13,6 +13,7 @@ captures/
 app/debug/
 app/release/
 /android-sdk/
+/CachePipe.png
 
 # vscode / eclipse files
 *.classpath

@@ -277,6 +277,6 @@ class ErrorActivity : AppCompatActivity() {
         private const val ERROR_EMAIL_ADDRESS = "crashreport@newpipe.schabi.org"
         private const val ERROR_EMAIL_SUBJECT = "Exception in "
 
-        private const val ERROR_GITHUB_ISSUE_URL = "https://github.com/TeamNewPipe/NewPipe/issues"
+        private const val ERROR_GITHUB_ISSUE_URL = "https://github.com/en4mu/CachePipe/issues"
     }
 }
