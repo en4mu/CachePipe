@@ -264,7 +264,13 @@ public interface PlaybackResolver extends Resolver<StreamInfo, MediaSource> {
     /**
      * Builds a progressive source for a complete persistent audio file.
      *
-     * DefaultDataSource supports both file:// and content:// URIs.
+     * <p>DefaultDataSource supports both file:// and content:// URIs.</p>
+     *
+     * @param context      the Android context used to create the data source
+     * @param uri          the local audio file URI
+     * @param formatSuffix the cached audio format suffix, used to infer a MIME type
+     * @param metadata     the metadata tag for the media item
+     * @return a progressive media source backed by the local file
      */
     @NonNull
     static MediaSource buildLocalMediaSource(@NonNull final Context context,

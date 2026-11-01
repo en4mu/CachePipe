@@ -32,7 +32,7 @@ object PlaylistCacheUi {
     fun confirmRemoveCachedAudio(
         activity: Activity,
         jobKey: String,
-        playlistName: String,
+        playlistName: String
     ) {
         AlertDialog.Builder(activity)
             .setTitle(R.string.remove_cached_audio)
@@ -54,7 +54,7 @@ object PlaylistCacheUi {
                 Toast.makeText(
                     context,
                     R.string.no_cached_tracks,
-                    Toast.LENGTH_SHORT,
+                    Toast.LENGTH_SHORT
                 ).show()
                 return@launch
             }
@@ -64,7 +64,7 @@ object PlaylistCacheUi {
             Toast.makeText(
                 context,
                 context.getString(R.string.cached_audio_removed, deleted),
-                Toast.LENGTH_SHORT,
+                Toast.LENGTH_SHORT
             ).show()
         }
     }
@@ -89,7 +89,7 @@ object PlaylistCacheUi {
                     track.streamUrl,
                     track.title,
                     runCatching { StreamType.valueOf(track.streamType) }
-                        .getOrDefault(StreamType.VIDEO_STREAM),
+                        .getOrDefault(StreamType.VIDEO_STREAM)
                 ).apply {
                     duration = track.durationSeconds
                     uploaderName = track.uploader
@@ -100,7 +100,7 @@ object PlaylistCacheUi {
             NavigationHelper.playOnBackgroundPlayer(
                 context,
                 SinglePlayQueue(items, 0),
-                true,
+                true
             )
         }
     }

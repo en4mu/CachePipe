@@ -17,7 +17,7 @@ enum class PlaylistCacheJobState {
     COMPLETE,
     PARTIAL,
     CANCELED,
-    FAILED,
+    FAILED
 }
 
 enum class PlaylistCacheTrackState {
@@ -28,7 +28,7 @@ enum class PlaylistCacheTrackState {
     COMPLETE,
     FAILED,
     CANCELED,
-    SKIPPED,
+    SKIPPED
 }
 
 /**
@@ -39,7 +39,7 @@ enum class PlaylistCacheTrackState {
  */
 @Entity(
     tableName = PlaylistCacheJobEntity.TABLE_NAME,
-    indices = [Index(value = [PlaylistCacheJobEntity.JOB_KEY], unique = true)],
+    indices = [Index(value = [PlaylistCacheJobEntity.JOB_KEY], unique = true)]
 )
 data class PlaylistCacheJobEntity(
     @PrimaryKey(autoGenerate = true)
@@ -83,7 +83,7 @@ data class PlaylistCacheJobEntity(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = UPDATED_AT)
-    var updatedAt: Long = System.currentTimeMillis(),
+    var updatedAt: Long = System.currentTimeMillis()
 ) {
     companion object {
         const val TABLE_NAME = "cache_jobs"
@@ -117,15 +117,15 @@ data class PlaylistCacheJobEntity(
             entity = PlaylistCacheJobEntity::class,
             parentColumns = [PlaylistCacheJobEntity.ID],
             childColumns = [PlaylistCacheTrackEntity.JOB_ID],
-            onDelete = ForeignKey.CASCADE,
-        ),
+            onDelete = ForeignKey.CASCADE
+        )
     ],
     indices = [
         Index(value = [PlaylistCacheTrackEntity.JOB_ID]),
         Index(value = [PlaylistCacheTrackEntity.CACHE_KEY]),
         Index(value = [PlaylistCacheTrackEntity.TARGET_URI]),
-        Index(value = [PlaylistCacheTrackEntity.SERVICE_ID, PlaylistCacheTrackEntity.STREAM_URL]),
-    ],
+        Index(value = [PlaylistCacheTrackEntity.SERVICE_ID, PlaylistCacheTrackEntity.STREAM_URL])
+    ]
 )
 data class PlaylistCacheTrackEntity(
     @PrimaryKey(autoGenerate = true)
@@ -193,7 +193,7 @@ data class PlaylistCacheTrackEntity(
     var error: String? = null,
 
     @ColumnInfo(name = UPDATED_AT)
-    var updatedAt: Long = System.currentTimeMillis(),
+    var updatedAt: Long = System.currentTimeMillis()
 ) {
     companion object {
         const val TABLE_NAME = "cache_tracks"
@@ -227,7 +227,7 @@ data class PlaylistCacheTrackEntity(
  */
 @Entity(
     tableName = CachedAudioEntity.TABLE_NAME,
-    indices = [Index(value = [CachedAudioEntity.CACHE_KEY], unique = true)],
+    indices = [Index(value = [CachedAudioEntity.CACHE_KEY], unique = true)]
 )
 data class CachedAudioEntity(
     @PrimaryKey
@@ -259,7 +259,7 @@ data class CachedAudioEntity(
     val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = UPDATED_AT)
-    var updatedAt: Long = System.currentTimeMillis(),
+    var updatedAt: Long = System.currentTimeMillis()
 ) {
     companion object {
         const val TABLE_NAME = "cached_audio"

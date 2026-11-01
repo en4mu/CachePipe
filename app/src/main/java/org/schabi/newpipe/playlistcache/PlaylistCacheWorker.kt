@@ -24,12 +24,13 @@ import kotlinx.coroutines.rx3.await
 import kotlinx.coroutines.withContext
 import org.schabi.newpipe.NewPipeDatabase
 import org.schabi.newpipe.R
+import org.schabi.newpipe.download.AudioPostprocessingHelper
 import org.schabi.newpipe.extractor.Page
+import org.schabi.newpipe.extractor.stream.DeliveryMethod
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
 import org.schabi.newpipe.extractor.stream.StreamType
 import org.schabi.newpipe.local.playlist.LocalPlaylistManager
-import org.schabi.newpipe.download.AudioPostprocessingHelper
 import org.schabi.newpipe.player.resolver.PlaybackResolver
 import org.schabi.newpipe.streams.io.StoredFileHelper
 import org.schabi.newpipe.util.ExtractorHelper
@@ -47,18 +48,12 @@ import us.shandian.giga.service.DownloadManagerService
  */
 class PlaylistCacheWorker(
     appContext: Context,
-    workerParams: WorkerParameters,
+    workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
-    private var controller: GigaMissionController? = null
     private val targetUris: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return createForegroundInfo(0, 0, applicationContext.getString(R.string.app_name))
-    }
-
-    override fun onStopped() {
-        controller?.cancelMissions(targetUris)
-        super.onStopped()
     }
 
     override suspend fun doWork(): Result {
@@ -83,7 +78,7 @@ class PlaylistCacheWorker(
             isLocal = isLocal,
             localPlaylistId = localPlaylistId,
             playlistName = playlistName,
-            thumbnailUrl = thumbnailUrl,
+            thumbnailUrl = thumbnailUrl
         )
         manager.markJobRunning(job.id)
         setForeground(createForegroundInfo(0, 0, playlistName))
@@ -103,7 +98,7 @@ class PlaylistCacheWorker(
 
         val tracks = manager.seedTracks(
             jobId = job.id,
-            tracks = items.mapIndexed { index, item -> item.toTrackEntity(job.id, index) },
+            tracks = items.mapIndexed { index, item -> item.toTrackEntity(job.id, index) }
         )
         if (tracks.isEmpty()) {
             manager.markJobFailed(job.id)
@@ -111,7 +106,6 @@ class PlaylistCacheWorker(
         }
 
         val missionController = GigaMissionController(applicationContext)
-        controller = missionController
         if (!missionController.connect()) {
             manager.markJobFailed(job.id)
             return Result.retry()
@@ -145,14 +139,13 @@ class PlaylistCacheWorker(
             manager.refreshJobProgress(job.id)
             return Result.success()
         } finally {
-            controller = null
             missionController.disconnect()
         }
     }
 
     private suspend fun scheduleTrack(
         manager: PlaylistCacheManager,
-        track: PlaylistCacheTrackEntity,
+        track: PlaylistCacheTrackEntity
     ) {
         manager.markTrackResolving(track.id)
         val info: StreamInfo = try {
@@ -170,17 +163,20 @@ class PlaylistCacheWorker(
 
         val audioStreams = ListHelper.getFilteredAudioStreams(
             applicationContext,
-            info.audioStreams,
+            info.audioStreams
         )
         val audioIndex = ListHelper.getAudioFormatIndex(applicationContext, audioStreams, null)
         val audioStream = audioStreams.getOrNull(audioIndex)
-        if (audioStream == null || !audioStream.isUrl) {
-            manager.markTrackFailedById(track.id, "No playable audio stream found")
+        if (audioStream == null ||
+            !audioStream.isUrl ||
+            audioStream.deliveryMethod != DeliveryMethod.PROGRESSIVE_HTTP
+        ) {
+            manager.markTrackFailedById(track.id, "No progressive audio stream found")
             return
         }
 
         val content = audioStream.content
-        if (content == null || content.isEmpty()) {
+        if (content.isEmpty()) {
             manager.markTrackFailedById(track.id, "Audio stream has no content URL")
             return
         }
@@ -202,7 +198,7 @@ class PlaylistCacheWorker(
                 audioBitrate = audioStream.averageBitrate,
                 audioTrackId = audioStream.audioTrackId,
                 streamInfo = info,
-                targetFile = part,
+                targetFile = part
             )
         } catch (e: Exception) {
             manager.markTrackFailedById(track.id, e.message)
@@ -220,7 +216,7 @@ class PlaylistCacheWorker(
                 applicationContext,
                 null,
                 Uri.fromFile(part),
-                DownloadManager.TAG_AUDIO,
+                DownloadManager.TAG_AUDIO
             )
             DownloadManagerService.startMission(
                 applicationContext,
@@ -232,7 +228,7 @@ class PlaylistCacheWorker(
                 AudioPostprocessingHelper.postprocessingName(audioStream),
                 null,
                 0L,
-                arrayListOf(MissionRecoveryInfo(audioStream)),
+                arrayListOf(MissionRecoveryInfo(audioStream))
             )
         } catch (e: Exception) {
             manager.markTrackFailedByTargetUri(targetUri, e.message)
@@ -243,7 +239,7 @@ class PlaylistCacheWorker(
         manager: PlaylistCacheManager,
         jobId: Long,
         missionController: GigaMissionController,
-        playlistName: String,
+        playlistName: String
     ) {
         while (!isStopped) {
             val progress = missionController.missionProgress()
@@ -269,8 +265,8 @@ class PlaylistCacheWorker(
                 workDataOf(
                     PlaylistCacheScheduler.PROGRESS_COMPLETED to completed,
                     PlaylistCacheScheduler.PROGRESS_TOTAL to refreshed.size,
-                    PlaylistCacheScheduler.PROGRESS_TITLE to currentTitle,
-                ),
+                    PlaylistCacheScheduler.PROGRESS_TITLE to currentTitle
+                )
             )
             setForeground(createForegroundInfo(completed, refreshed.size, currentTitle))
 
@@ -285,7 +281,7 @@ class PlaylistCacheWorker(
     private suspend fun cancelRemaining(
         manager: PlaylistCacheManager,
         jobId: Long,
-        missionController: GigaMissionController,
+        missionController: GigaMissionController
     ) {
         missionController.cancelMissions(targetUris)
         manager.getTracks(jobId).forEach { track ->
@@ -305,7 +301,7 @@ class PlaylistCacheWorker(
 
     private suspend fun loadRemoteTracks(
         serviceId: Int,
-        playlistUrl: String,
+        playlistUrl: String
     ): List<StreamInfoItem> {
         val first = ExtractorHelper.getPlaylistInfo(serviceId, playlistUrl, false).await()
         val result = mutableListOf<StreamInfoItem>()
@@ -316,7 +312,7 @@ class PlaylistCacheWorker(
             val page = ExtractorHelper.getMorePlaylistItems(
                 serviceId,
                 playlistUrl,
-                nextPage,
+                nextPage
             ).await()
             result.addAll(page.items.filterIsInstance<StreamInfoItem>())
             nextPage = page.nextPage
@@ -333,7 +329,7 @@ class PlaylistCacheWorker(
 
     private fun StreamInfoItem.toTrackEntity(
         jobId: Long,
-        position: Int,
+        position: Int
     ): PlaylistCacheTrackEntity {
         return PlaylistCacheTrackEntity(
             jobId = jobId,
@@ -345,21 +341,21 @@ class PlaylistCacheWorker(
             uploaderUrl = uploaderUrl,
             durationSeconds = duration,
             thumbnailUrl = ImageStrategy.imageListToDbUrl(thumbnails),
-            streamType = streamType.name,
+            streamType = streamType.name
         )
     }
 
     private fun createForegroundInfo(
         completed: Int,
         total: Int,
-        title: String,
+        title: String
     ): ForegroundInfo {
         val cancelIntent = WorkManager.getInstance(applicationContext)
             .createCancelPendingIntent(id)
         val indeterminate = total <= 0
         val notification: Notification = NotificationCompat.Builder(
             applicationContext,
-            applicationContext.getString(R.string.notification_channel_id),
+            applicationContext.getString(R.string.notification_channel_id)
         )
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setContentTitle(applicationContext.getString(R.string.downloads_title))

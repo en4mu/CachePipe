@@ -64,6 +64,8 @@ public interface MediaItemTag {
     /**
      * Whether this media item is backed by a complete persistent audio file rather than a
      * temporary network buffer.
+     *
+     * @return whether the media item is fully cached
      */
     default boolean isFullyCached() {
         return false;
@@ -71,6 +73,8 @@ public interface MediaItemTag {
 
     /**
      * The cache key of the persistent audio file backing this media item, or null.
+     *
+     * @return the cache key, or null when the item is not fully cached
      */
     @Nullable
     default String getCacheKey() {
@@ -83,6 +87,9 @@ public interface MediaItemTag {
 
     /**
      * Returns a tag marked as backed by a complete persistent file.
+     *
+     * @param cacheKey the cache key of the persistent file
+     * @return a tag marked as fully cached
      */
     @NonNull
     default MediaItemTag withFullyCached(@NonNull final String cacheKey) {

@@ -33,7 +33,7 @@ object PlaylistCachePlayback {
     fun findOfflineStreamInfo(
         context: Context,
         serviceId: Int,
-        streamUrl: String,
+        streamUrl: String
     ): StreamInfo? {
         return runBlocking(Dispatchers.IO) {
             PlaylistCacheManager(context).getOfflineStreamInfo(serviceId, streamUrl)

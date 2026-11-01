@@ -28,21 +28,24 @@ object PlaylistCacheScheduler {
 
     private const val WORK_PREFIX = "playlist_cache_work_"
 
+    @JvmStatic
     fun remoteJobKey(serviceId: Int, playlistUrl: String): String {
         return "remote:$serviceId:$playlistUrl"
     }
 
+    @JvmStatic
     fun localJobKey(localPlaylistId: Long): String {
         return "local:$localPlaylistId"
     }
 
+    @JvmStatic
     fun enqueueRemote(
         context: Context,
         serviceId: Int,
         playlistUrl: String,
         playlistName: String,
         thumbnailUrl: String?,
-        replace: Boolean = false,
+        replace: Boolean = false
     ): String {
         val jobKey = remoteJobKey(serviceId, playlistUrl)
         enqueue(
@@ -54,17 +57,18 @@ object PlaylistCacheScheduler {
             localPlaylistId = null,
             playlistName = playlistName,
             thumbnailUrl = thumbnailUrl,
-            replace = replace,
+            replace = replace
         )
         return jobKey
     }
 
+    @JvmStatic
     fun enqueueLocal(
         context: Context,
         localPlaylistId: Long,
         playlistName: String,
         thumbnailUrl: String?,
-        replace: Boolean = false,
+        replace: Boolean = false
     ): String {
         val jobKey = localJobKey(localPlaylistId)
         enqueue(
@@ -76,15 +80,17 @@ object PlaylistCacheScheduler {
             localPlaylistId = localPlaylistId,
             playlistName = playlistName,
             thumbnailUrl = thumbnailUrl,
-            replace = replace,
+            replace = replace
         )
         return jobKey
     }
 
+    @JvmStatic
     fun cancel(context: Context, jobKey: String) {
         WorkManager.getInstance(context).cancelUniqueWork(workName(jobKey))
     }
 
+    @JvmStatic
     fun workName(jobKey: String): String {
         return WORK_PREFIX + jobKey.hashCode().toUInt().toString(16)
     }
@@ -98,7 +104,7 @@ object PlaylistCacheScheduler {
         localPlaylistId: Long?,
         playlistName: String,
         thumbnailUrl: String?,
-        replace: Boolean,
+        replace: Boolean
     ) {
         val data = workDataOf(
             INPUT_JOB_KEY to jobKey,
@@ -107,14 +113,14 @@ object PlaylistCacheScheduler {
             INPUT_IS_LOCAL to isLocal,
             INPUT_LOCAL_PLAYLIST_ID to (localPlaylistId ?: -1L),
             INPUT_PLAYLIST_NAME to playlistName,
-            INPUT_THUMBNAIL_URL to (thumbnailUrl ?: ""),
+            INPUT_THUMBNAIL_URL to (thumbnailUrl ?: "")
         )
         val request = OneTimeWorkRequestBuilder<PlaylistCacheWorker>()
             .setInputData(data)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
+                    .build()
             )
             .build()
         val policy = if (replace) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP

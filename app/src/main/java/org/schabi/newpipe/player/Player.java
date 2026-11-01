@@ -1614,6 +1614,9 @@ public final class Player implements PlaybackListener, Listener {
     /**
      * If a local cached track is corrupt or unreadable, invalidate it and rebuild the current
      * queue item from the online source. Only one fallback is attempted per cache key.
+     *
+     * @param error the playback error raised by the local source
+     * @return whether an online fallback was started
      */
     private boolean fallbackFromBrokenCache(@NonNull final PlaybackException error) {
         final MediaItemTag metadata = currentMetadata;

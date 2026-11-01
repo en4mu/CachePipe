@@ -53,19 +53,19 @@ interface PlaylistCacheDao {
     @Query("SELECT * FROM ${PlaylistCacheTrackEntity.TABLE_NAME} WHERE ${PlaylistCacheTrackEntity.JOB_ID} = :jobId AND ${PlaylistCacheTrackEntity.STATE} = :state ORDER BY ${PlaylistCacheTrackEntity.POSITION}")
     suspend fun getTracksForJobByState(
         jobId: Long,
-        state: String,
+        state: String
     ): List<PlaylistCacheTrackEntity>
 
     @Query("SELECT * FROM ${PlaylistCacheTrackEntity.TABLE_NAME} WHERE ${PlaylistCacheTrackEntity.JOB_ID} = :jobId AND ${PlaylistCacheTrackEntity.STATE} IN (:states) ORDER BY ${PlaylistCacheTrackEntity.POSITION}")
     suspend fun getTracksForJobByStates(
         jobId: Long,
-        states: List<String>,
+        states: List<String>
     ): List<PlaylistCacheTrackEntity>
 
     @Query("SELECT * FROM ${PlaylistCacheTrackEntity.TABLE_NAME} WHERE ${PlaylistCacheTrackEntity.JOB_ID} = :jobId AND ${PlaylistCacheTrackEntity.STATE} = :state ORDER BY ${PlaylistCacheTrackEntity.POSITION}")
     fun observeTracksForJobByState(
         jobId: Long,
-        state: String,
+        state: String
     ): Flow<List<PlaylistCacheTrackEntity>>
 
     @Query("SELECT * FROM ${PlaylistCacheTrackEntity.TABLE_NAME} WHERE ${PlaylistCacheTrackEntity.ID} = :trackId LIMIT 1")
@@ -79,12 +79,12 @@ interface PlaylistCacheDao {
             "WHERE ${PlaylistCacheTrackEntity.SERVICE_ID} = :serviceId " +
             "AND ${PlaylistCacheTrackEntity.STREAM_URL} = :streamUrl " +
             "AND ${PlaylistCacheTrackEntity.STATE} = :state " +
-            "ORDER BY ${PlaylistCacheTrackEntity.UPDATED_AT} DESC LIMIT 1",
+            "ORDER BY ${PlaylistCacheTrackEntity.UPDATED_AT} DESC LIMIT 1"
     )
     suspend fun getTrackForStreamByState(
         serviceId: Int,
         streamUrl: String,
-        state: String,
+        state: String
     ): PlaylistCacheTrackEntity?
 
     @Query(
@@ -92,12 +92,12 @@ interface PlaylistCacheDao {
             "WHERE ${PlaylistCacheTrackEntity.SERVICE_ID} = :serviceId " +
             "AND ${PlaylistCacheTrackEntity.STREAM_URL} = :streamUrl " +
             "AND ${PlaylistCacheTrackEntity.STATE} IN (:states) " +
-            "ORDER BY ${PlaylistCacheTrackEntity.UPDATED_AT} DESC LIMIT 1",
+            "ORDER BY ${PlaylistCacheTrackEntity.UPDATED_AT} DESC LIMIT 1"
     )
     suspend fun getTrackForStreamByStates(
         serviceId: Int,
         streamUrl: String,
-        states: List<String>,
+        states: List<String>
     ): PlaylistCacheTrackEntity?
 
     @Insert

@@ -16,10 +16,10 @@ import kotlin.concurrent.Volatile
     entities = [
         PlaylistCacheJobEntity::class,
         PlaylistCacheTrackEntity::class,
-        CachedAudioEntity::class,
+        CachedAudioEntity::class
     ],
     version = 1,
-    exportSchema = true,
+    exportSchema = true
 )
 abstract class PlaylistCacheDatabase : RoomDatabase() {
     abstract fun cacheDao(): PlaylistCacheDao
@@ -41,7 +41,7 @@ abstract class PlaylistCacheDatabase : RoomDatabase() {
                         result = Room.databaseBuilder(
                             context.applicationContext,
                             PlaylistCacheDatabase::class.java,
-                            DATABASE_NAME,
+                            DATABASE_NAME
                         ).setDriver(BundledSQLiteDriver()).build()
                         instance = result
                     }
@@ -51,7 +51,7 @@ abstract class PlaylistCacheDatabase : RoomDatabase() {
         }
 
         @JvmStatic
-        fun close() {
+        fun closeInstance() {
             synchronized(PlaylistCacheDatabase::class.java) {
                 instance?.close()
                 instance = null

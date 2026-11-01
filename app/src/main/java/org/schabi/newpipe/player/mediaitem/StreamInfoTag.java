@@ -164,7 +164,7 @@ public final class StreamInfoTag implements MediaItemTag {
 
     @NonNull
     @Override
-    public StreamInfoTag withFullyCached(@NonNull final String cacheKey) {
-        return new StreamInfoTag(streamInfo, quality, audioTrack, extras, true, cacheKey);
+    public StreamInfoTag withFullyCached(@NonNull final String newCacheKey) {
+        return new StreamInfoTag(streamInfo, quality, audioTrack, extras, true, newCacheKey);
     }
 }

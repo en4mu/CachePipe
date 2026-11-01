@@ -25,24 +25,21 @@ class PlaylistCacheManager(context: Context) {
 
     fun observeJobs(): Flow<List<PlaylistCacheJobEntity>> = dao.observeJobs()
 
-    fun observeTracks(jobId: Long): Flow<List<PlaylistCacheTrackEntity>> =
-        dao.observeTracksForJob(jobId)
+    fun observeTracks(jobId: Long): Flow<List<PlaylistCacheTrackEntity>> = dao.observeTracksForJob(jobId)
 
     suspend fun getJobByKey(jobKey: String): PlaylistCacheJobEntity? = dao.getJobByKey(jobKey)
 
     suspend fun getJobById(jobId: Long): PlaylistCacheJobEntity? = dao.getJobById(jobId)
 
-    suspend fun getTracks(jobId: Long): List<PlaylistCacheTrackEntity> =
-        dao.getTracksForJob(jobId)
+    suspend fun getTracks(jobId: Long): List<PlaylistCacheTrackEntity> = dao.getTracksForJob(jobId)
 
-    suspend fun getCompleteTracks(jobId: Long): List<PlaylistCacheTrackEntity> =
-        dao.getTracksForJobByStates(
-            jobId,
-            listOf(
-                PlaylistCacheTrackState.COMPLETE.name,
-                PlaylistCacheTrackState.SKIPPED.name,
-            ),
+    suspend fun getCompleteTracks(jobId: Long): List<PlaylistCacheTrackEntity> = dao.getTracksForJobByStates(
+        jobId,
+        listOf(
+            PlaylistCacheTrackState.COMPLETE.name,
+            PlaylistCacheTrackState.SKIPPED.name
         )
+    )
 
     suspend fun getOrCreateJob(
         jobKey: String,
@@ -51,7 +48,7 @@ class PlaylistCacheManager(context: Context) {
         isLocal: Boolean,
         localPlaylistId: Long?,
         playlistName: String,
-        thumbnailUrl: String?,
+        thumbnailUrl: String?
     ): PlaylistCacheJobEntity {
         dao.getJobByKey(jobKey)?.let { return it }
 
@@ -62,7 +59,7 @@ class PlaylistCacheManager(context: Context) {
             isLocal = isLocal,
             localPlaylistId = localPlaylistId,
             playlistName = playlistName,
-            thumbnailUrl = thumbnailUrl,
+            thumbnailUrl = thumbnailUrl
         )
         val id = dao.insertJob(entity)
         if (id >= 0) {
@@ -79,7 +76,7 @@ class PlaylistCacheManager(context: Context) {
      */
     suspend fun seedTracks(
         jobId: Long,
-        tracks: List<PlaylistCacheTrackEntity>,
+        tracks: List<PlaylistCacheTrackEntity>
     ): List<PlaylistCacheTrackEntity> {
         val existing = dao.getTracksForJob(jobId)
         if (existing.isNotEmpty() || tracks.isEmpty()) {
@@ -106,7 +103,7 @@ class PlaylistCacheManager(context: Context) {
         audioBitrate: Int,
         audioTrackId: String?,
         streamInfo: StreamInfo,
-        targetFile: File,
+        targetFile: File
     ): Boolean {
         val metadataFile = storage.writeStreamInfo(cacheKey, streamInfo) ?: return false
         val track = dao.getTrackById(trackId) ?: return false
@@ -124,8 +121,7 @@ class PlaylistCacheManager(context: Context) {
         return true
     }
 
-    suspend fun getTrackByTargetUri(targetUri: String): PlaylistCacheTrackEntity? =
-        dao.getTrackByTargetUri(targetUri)
+    suspend fun getTrackByTargetUri(targetUri: String): PlaylistCacheTrackEntity? = dao.getTrackByTargetUri(targetUri)
 
     suspend fun markTrackSkipped(trackId: Long, cacheKey: String) {
         val track = dao.getTrackById(trackId) ?: return
@@ -153,7 +149,7 @@ class PlaylistCacheManager(context: Context) {
     suspend fun updateTrackProgress(
         targetUri: String,
         downloadedBytes: Long,
-        totalBytes: Long,
+        totalBytes: Long
     ) {
         val track = dao.getTrackByTargetUri(targetUri) ?: return
         if (track.state == PlaylistCacheTrackState.COMPLETE.name ||
@@ -199,7 +195,7 @@ class PlaylistCacheManager(context: Context) {
             bitrate = track.audioBitrate,
             audioTrackId = track.audioTrackId,
             sizeBytes = finalFile.length(),
-            metadataVersion = PlaylistCacheStorage.METADATA_VERSION,
+            metadataVersion = PlaylistCacheStorage.METADATA_VERSION
         )
 
         database.withWriteTransaction {
@@ -332,8 +328,8 @@ class PlaylistCacheManager(context: Context) {
             streamUrl,
             listOf(
                 PlaylistCacheTrackState.COMPLETE.name,
-                PlaylistCacheTrackState.SKIPPED.name,
-            ),
+                PlaylistCacheTrackState.SKIPPED.name
+            )
         ) ?: return null
         val cacheKey = track.cacheKey ?: return null
         val audio = dao.getCachedAudio(cacheKey) ?: return null

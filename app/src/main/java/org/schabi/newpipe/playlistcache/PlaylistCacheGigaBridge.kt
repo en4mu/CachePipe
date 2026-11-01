@@ -21,6 +21,7 @@ import us.shandian.giga.get.DownloadMission
 object PlaylistCacheGigaBridge {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    @JvmStatic
     fun onMissionFinished(context: Context, mission: DownloadMission) {
         val targetUri = mission.storageUriOrNull() ?: return
         scope.launch {
@@ -29,6 +30,7 @@ object PlaylistCacheGigaBridge {
         }
     }
 
+    @JvmStatic
     fun onMissionError(context: Context, mission: DownloadMission) {
         val targetUri = mission.storageUriOrNull() ?: return
         val terminal = !mission.enqueued
@@ -37,7 +39,7 @@ object PlaylistCacheGigaBridge {
             if (terminal) {
                 manager.markTrackFailedByTargetUri(
                     targetUri,
-                    "Download failed with code ${mission.errCode}",
+                    "Download failed with code ${mission.errCode}"
                 )
             }
         }
