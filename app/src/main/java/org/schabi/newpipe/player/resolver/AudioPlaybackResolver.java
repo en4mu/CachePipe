@@ -4,6 +4,7 @@ import static org.schabi.newpipe.util.ListHelper.getFilteredAudioStreams;
 import static org.schabi.newpipe.util.ListHelper.getPlayableStreams;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -18,8 +19,11 @@ import org.schabi.newpipe.extractor.stream.VideoStream;
 import org.schabi.newpipe.player.helper.PlayerDataSource;
 import org.schabi.newpipe.player.mediaitem.MediaItemTag;
 import org.schabi.newpipe.player.mediaitem.StreamInfoTag;
+import org.schabi.newpipe.playlistcache.CachedAudioEntity;
+import org.schabi.newpipe.playlistcache.PlaylistCachePlayback;
 import org.schabi.newpipe.util.ListHelper;
 
+import java.io.File;
 import java.util.List;
 
 public class AudioPlaybackResolver implements PlaybackResolver {
@@ -75,9 +79,24 @@ public class AudioPlaybackResolver implements PlaybackResolver {
             }
         }
 
+        final String cacheKey = PlaybackResolver.cacheKeyOf(info, stream);
+        final CachedAudioEntity cachedAudio =
+                PlaylistCachePlayback.findCompleteAudio(context, cacheKey);
+        if (cachedAudio != null) {
+            try {
+                return PlaybackResolver.buildLocalMediaSource(
+                        context,
+                        Uri.fromFile(new File(cachedAudio.getFilePath())),
+                        cachedAudio.getFormat(),
+                        tag.withFullyCached(cacheKey));
+            } catch (final Exception e) {
+                Log.e(TAG, "Unable to create local cached audio source", e);
+                PlaylistCachePlayback.invalidate(context, cacheKey);
+            }
+        }
+
         try {
-            return PlaybackResolver.buildMediaSource(
-                    dataSource, stream, info, PlaybackResolver.cacheKeyOf(info, stream), tag);
+            return PlaybackResolver.buildMediaSource(dataSource, stream, info, cacheKey, tag);
         } catch (final ResolverException e) {
             Log.e(TAG, "Unable to create audio source", e);
             return null;

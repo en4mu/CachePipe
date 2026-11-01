@@ -16,6 +16,10 @@ import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.jakewharton.processphoenix.ProcessPhoenix
 import io.reactivex.rxjava3.exceptions.CompositeException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import io.reactivex.rxjava3.exceptions.MissingBackpressureException
 import io.reactivex.rxjava3.exceptions.OnErrorNotImplementedException
 import io.reactivex.rxjava3.exceptions.UndeliverableException
@@ -32,6 +36,7 @@ import org.schabi.newpipe.extractor.NewPipe
 import org.schabi.newpipe.extractor.downloader.Downloader
 import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor
 import org.schabi.newpipe.ktx.hasAssignableCause
+import org.schabi.newpipe.playlistcache.PlaylistCacheManager
 import org.schabi.newpipe.settings.NewPipeSettings
 import org.schabi.newpipe.util.BridgeStateSaverInitializer
 import org.schabi.newpipe.util.Localization
@@ -79,6 +84,14 @@ open class App :
         super.onCreate()
 
         instance = this
+
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            runCatching {
+                val cacheManager = PlaylistCacheManager(this@App)
+                cacheManager.cleanupOrphans()
+                cacheManager.reconcileJobs()
+            }
+        }
 
         if (ProcessPhoenix.isPhoenixProcess(this)) {
             Log.i(TAG, "This is a phoenix process! Aborting initialization of App[onCreate]")

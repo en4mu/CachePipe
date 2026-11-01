@@ -42,6 +42,7 @@ import org.schabi.newpipe.R;
 import org.schabi.newpipe.download.DownloadActivity;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
 import org.schabi.newpipe.player.helper.LockManager;
+import org.schabi.newpipe.playlistcache.PlaylistCacheGigaBridge;
 import org.schabi.newpipe.streams.io.StoredDirectoryHelper;
 import org.schabi.newpipe.streams.io.StoredFileHelper;
 import org.schabi.newpipe.util.Localization;
@@ -200,6 +201,9 @@ public class DownloadManagerService extends Service {
         String action = intent.getAction();
         if (action != null) {
             if (action.equals(Intent.ACTION_RUN)) {
+                // The service may be started from a WorkManager foreground worker, so it must
+                // promote itself immediately when started as a foreground service.
+                updateForegroundState(true);
                 mHandler.post(() -> startMission(intent));
             } else if (downloadDoneNotification != null) {
                 if (action.equals(ACTION_RESET_DOWNLOAD_FINISHED) || action.equals(ACTION_OPEN_DOWNLOADS_FINISHED)) {
@@ -260,6 +264,7 @@ public class DownloadManagerService extends Service {
 
         switch (msg.what) {
             case MESSAGE_FINISHED:
+                PlaylistCacheGigaBridge.onMissionFinished(this, mission);
                 notifyMediaScanner(mission.storage.getUri());
                 notifyFinishedDownload(mission.storage.getName());
                 mManager.setFinished(mission);
@@ -270,6 +275,7 @@ public class DownloadManagerService extends Service {
                 updateForegroundState(true);
                 break;
             case MESSAGE_ERROR:
+                PlaylistCacheGigaBridge.onMissionError(this, mission);
                 notifyFailedDownload(mission);
                 handleConnectivityState(false);
                 updateForegroundState(mManager.runMissions());
@@ -377,7 +383,7 @@ public class DownloadManagerService extends Service {
                 .putExtra(EXTRA_STORAGE_TAG, storage.getTag())
                 .putExtra(EXTRA_STREAM_INFO, streamInfo);
 
-        context.startService(intent);
+        ContextCompat.startForegroundService(context, intent);
     }
 
     private void startMission(Intent intent) {

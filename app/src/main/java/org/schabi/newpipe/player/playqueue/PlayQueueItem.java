@@ -3,15 +3,18 @@ package org.schabi.newpipe.player.playqueue;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.schabi.newpipe.App;
 import org.schabi.newpipe.extractor.Image;
 import org.schabi.newpipe.extractor.stream.StreamInfo;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.extractor.stream.StreamType;
+import org.schabi.newpipe.playlistcache.PlaylistCachePlayback;
 import org.schabi.newpipe.util.ExtractorHelper;
 
 import java.io.Serializable;
 import java.util.List;
 
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -139,8 +142,14 @@ public class PlayQueueItem implements Serializable {
 
     @NonNull
     public Single<StreamInfo> getStream() {
-        return ExtractorHelper.getStreamInfo(this.serviceId, this.url, false)
+        return Maybe
+                .fromCallable(() -> PlaylistCachePlayback.findOfflineStreamInfo(
+                        App.getInstance(), this.serviceId, this.url))
                 .subscribeOn(Schedulers.io())
+                .onErrorResumeNext(throwable -> Maybe.empty())
+                .switchIfEmpty(ExtractorHelper.getStreamInfo(this.serviceId, this.url, false)
+                        .toMaybe())
+                .toSingle()
                 .doOnError(throwable -> error = throwable);
     }
 

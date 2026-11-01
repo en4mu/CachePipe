@@ -114,6 +114,7 @@ import org.schabi.newpipe.player.resolver.AudioPlaybackResolver;
 import org.schabi.newpipe.player.resolver.VideoPlaybackResolver;
 import org.schabi.newpipe.player.resolver.VideoPlaybackResolver.SourceType;
 import org.schabi.newpipe.player.ui.BackgroundPlayerUi;
+import org.schabi.newpipe.playlistcache.PlaylistCachePlayback;
 import org.schabi.newpipe.player.ui.MainPlayerUi;
 import org.schabi.newpipe.player.ui.PlayerUi;
 import org.schabi.newpipe.player.ui.PlayerUiList;
@@ -199,6 +200,8 @@ public final class Player implements PlaybackListener, Listener {
     private PlayQueueItem currentItem;
     @Nullable
     private MediaItemTag currentMetadata;
+    private final java.util.Set<String> attemptedCacheFallbacks =
+            java.util.concurrent.ConcurrentHashMap.newKeySet();
     @Nullable
     private Bitmap currentThumbnail;
     @Nullable
@@ -1030,8 +1033,10 @@ public final class Player implements PlaybackListener, Listener {
             return;
         }
 
+        final int bufferPercent = currentMetadata != null && currentMetadata.isFullyCached()
+                ? 100 : simpleExoPlayer.getBufferedPercentage();
         onUpdateProgress(Math.max((int) simpleExoPlayer.getCurrentPosition(), 0),
-                (int) simpleExoPlayer.getDuration(), simpleExoPlayer.getBufferedPercentage());
+                (int) simpleExoPlayer.getDuration(), bufferPercent);
     }
 
     private Disposable getProgressUpdateDisposable() {
@@ -1551,6 +1556,10 @@ public final class Player implements PlaybackListener, Listener {
     public void onPlayerError(@NonNull final PlaybackException error) {
         Log.e(TAG, "ExoPlayer - onPlayerError() called with:", error);
 
+        if (fallbackFromBrokenCache(error)) {
+            return;
+        }
+
         saveStreamProgressState();
         boolean isCatchableException = false;
 
@@ -1599,6 +1608,49 @@ public final class Player implements PlaybackListener, Listener {
 
         if (fragmentListener != null) {
             fragmentListener.onPlayerError(error, isCatchableException);
+        }
+    }
+
+    /**
+     * If a local cached track is corrupt or unreadable, invalidate it and rebuild the current
+     * queue item from the online source. Only one fallback is attempted per cache key.
+     */
+    private boolean fallbackFromBrokenCache(@NonNull final PlaybackException error) {
+        final MediaItemTag metadata = currentMetadata;
+        if (metadata == null || !metadata.isFullyCached() || metadata.getCacheKey() == null
+                || !isLocalSourceError(error.errorCode)) {
+            return false;
+        }
+
+        final String cacheKey = metadata.getCacheKey();
+        if (!attemptedCacheFallbacks.add(cacheKey)) {
+            return false;
+        }
+
+        Log.w(TAG, "Local cached playback failed, retrying online for key " + cacheKey, error);
+        PlaylistCachePlayback.invalidateAndRun(context, cacheKey, () -> {
+            setRecovery();
+            reloadPlayQueueManager();
+        });
+        return true;
+    }
+
+    private static boolean isLocalSourceError(final int errorCode) {
+        switch (errorCode) {
+            case ERROR_CODE_IO_INVALID_HTTP_CONTENT_TYPE:
+            case ERROR_CODE_IO_BAD_HTTP_STATUS:
+            case ERROR_CODE_IO_FILE_NOT_FOUND:
+            case ERROR_CODE_IO_NO_PERMISSION:
+            case ERROR_CODE_IO_CLEARTEXT_NOT_PERMITTED:
+            case ERROR_CODE_IO_READ_POSITION_OUT_OF_RANGE:
+            case ERROR_CODE_IO_UNSPECIFIED:
+            case ERROR_CODE_PARSING_CONTAINER_MALFORMED:
+            case ERROR_CODE_PARSING_MANIFEST_MALFORMED:
+            case ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED:
+            case ERROR_CODE_PARSING_MANIFEST_UNSUPPORTED:
+                return true;
+            default:
+                return false;
         }
     }
 

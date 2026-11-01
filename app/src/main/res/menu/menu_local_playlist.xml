@@ -22,4 +22,24 @@
         android:id="@+id/menu_item_remove_duplicates"
         android:title="@string/remove_duplicates"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_cache_playlist"
+        android:title="@string/cache_playlist"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_cancel_caching"
+        android:title="@string/cancel_caching"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_remove_cached_audio"
+        android:title="@string/remove_cached_audio"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_play_cached"
+        android:title="@string/play_cached"
+        app:showAsAction="never" />
 </menu>

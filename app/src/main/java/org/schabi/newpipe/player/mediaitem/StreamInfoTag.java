@@ -30,15 +30,29 @@ public final class StreamInfoTag implements MediaItemTag {
     private final MediaItemTag.AudioTrack audioTrack;
     @Nullable
     private final Object extras;
+    private final boolean fullyCached;
+    @Nullable
+    private final String cacheKey;
 
     private StreamInfoTag(@NonNull final StreamInfo streamInfo,
                           @Nullable final MediaItemTag.Quality quality,
                           @Nullable final MediaItemTag.AudioTrack audioTrack,
                           @Nullable final Object extras) {
+        this(streamInfo, quality, audioTrack, extras, false, null);
+    }
+
+    private StreamInfoTag(@NonNull final StreamInfo streamInfo,
+                          @Nullable final MediaItemTag.Quality quality,
+                          @Nullable final MediaItemTag.AudioTrack audioTrack,
+                          @Nullable final Object extras,
+                          final boolean fullyCached,
+                          @Nullable final String cacheKey) {
         this.streamInfo = streamInfo;
         this.quality = quality;
         this.audioTrack = audioTrack;
         this.extras = extras;
+        this.fullyCached = fullyCached;
+        this.cacheKey = cacheKey;
     }
 
     public static StreamInfoTag of(@NonNull final StreamInfo streamInfo,
@@ -134,6 +148,23 @@ public final class StreamInfoTag implements MediaItemTag {
 
     @Override
     public StreamInfoTag withExtras(@NonNull final Object extra) {
-        return new StreamInfoTag(streamInfo, quality, audioTrack, extra);
+        return new StreamInfoTag(streamInfo, quality, audioTrack, extra, fullyCached, cacheKey);
+    }
+
+    @Override
+    public boolean isFullyCached() {
+        return fullyCached;
+    }
+
+    @Nullable
+    @Override
+    public String getCacheKey() {
+        return cacheKey;
+    }
+
+    @NonNull
+    @Override
+    public StreamInfoTag withFullyCached(@NonNull final String cacheKey) {
+        return new StreamInfoTag(streamInfo, quality, audioTrack, extras, true, cacheKey);
     }
 }

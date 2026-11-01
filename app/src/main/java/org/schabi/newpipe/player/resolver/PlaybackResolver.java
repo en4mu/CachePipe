@@ -4,15 +4,18 @@ import static org.schabi.newpipe.extractor.stream.AudioStream.UNKNOWN_BITRATE;
 import static org.schabi.newpipe.extractor.stream.VideoStream.RESOLUTION_UNKNOWN;
 import static org.schabi.newpipe.player.helper.PlayerDataSource.LIVE_STREAM_EDGE_GAP_MILLIS;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser;
@@ -257,6 +260,48 @@ public interface PlaybackResolver extends Resolver<StreamInfo, MediaSource> {
 
 
     //region Generic media sources
+
+    /**
+     * Builds a progressive source for a complete persistent audio file.
+     *
+     * DefaultDataSource supports both file:// and content:// URIs.
+     */
+    @NonNull
+    static MediaSource buildLocalMediaSource(@NonNull final Context context,
+                                              @NonNull final Uri uri,
+                                              @Nullable final String formatSuffix,
+                                              @NonNull final MediaItemTag metadata) {
+        return new ProgressiveMediaSource.Factory(new DefaultDataSource.Factory(context))
+                .createMediaSource(new MediaItem.Builder()
+                        .setUri(uri)
+                        .setTag(metadata)
+                        .setMimeType(mimeTypeOf(formatSuffix))
+                        .build());
+    }
+
+    @Nullable
+    private static String mimeTypeOf(@Nullable final String suffix) {
+        if (suffix == null) {
+            return null;
+        }
+        switch (suffix.toLowerCase()) {
+            case "m4a":
+            case "mp4":
+            case "aac":
+                return "audio/mp4";
+            case "webm":
+                return "audio/webm";
+            case "opus":
+            case "ogg":
+            case "oga":
+                return "audio/ogg";
+            case "mp3":
+                return "audio/mpeg";
+            default:
+                return null;
+        }
+    }
+
     static MediaSource buildMediaSource(final PlayerDataSource dataSource,
                                         final Stream stream,
                                         final StreamInfo streamInfo,

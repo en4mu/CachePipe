@@ -905,4 +905,13 @@
     <string name="api23_requirement_dialog_title">NewPipe is dropping support for Android 5</string>
     <string name="api23_requirement_dialog_message">Unfortunately NewPipe depends on a few libraries that dropped support for Android 5.0 and 5.1. The next NewPipe release will therefore only work on devices with Android 6 or higher, sadly. Read more in the blogpost.</string>
     <string name="api23_requirement_dialog_blogpost">Blogpost</string>
+    <string name="cache_playlist">Cache playlist</string>
+    <string name="cancel_caching">Cancel caching</string>
+    <string name="caching_canceled">Caching canceled</string>
+    <string name="caching_started">Caching playlist started</string>
+    <string name="remove_cached_audio">Remove cached audio</string>
+    <string name="remove_cached_audio_confirm">Remove cached audio for \"%1$s\"? Files still used by another playlist will be kept.</string>
+    <string name="cached_audio_removed">Removed %1$d cached files</string>
+    <string name="play_cached">Play cached</string>
+    <string name="no_cached_tracks">No cached tracks in this playlist</string>
 </resources>

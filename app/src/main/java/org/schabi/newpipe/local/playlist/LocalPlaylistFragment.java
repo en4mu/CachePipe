@@ -56,6 +56,8 @@ import org.schabi.newpipe.info_list.dialog.StreamDialogDefaultEntry;
 import org.schabi.newpipe.local.BaseLocalListFragment;
 import org.schabi.newpipe.player.playqueue.PlayQueue;
 import org.schabi.newpipe.player.playqueue.SinglePlayQueue;
+import org.schabi.newpipe.playlistcache.PlaylistCacheScheduler;
+import org.schabi.newpipe.playlistcache.PlaylistCacheUi;
 import org.schabi.newpipe.util.DeviceUtils;
 import org.schabi.newpipe.util.Localization;
 import org.schabi.newpipe.util.NavigationHelper;
@@ -372,6 +374,7 @@ public class LocalPlaylistFragment extends BaseLocalListFragment<List<PlaylistSt
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
+        final String jobKey = PlaylistCacheScheduler.localJobKey(playlistId);
         if (item.getItemId() == R.id.menu_item_share_playlist) {
             createShareConfirmationDialog();
         } else if (item.getItemId() == R.id.menu_item_rename_playlist) {
@@ -380,6 +383,17 @@ public class LocalPlaylistFragment extends BaseLocalListFragment<List<PlaylistSt
             openRemoveWatchedConfirmationDialog();
         } else if (item.getItemId() == R.id.menu_item_remove_duplicates) {
             openRemoveDuplicatesDialog();
+        } else if (item.getItemId() == R.id.menu_item_cache_playlist) {
+            PlaylistCacheScheduler.enqueueLocal(requireContext(), playlistId,
+                    name == null ? "" : name, null, false);
+            Toast.makeText(requireContext(), R.string.caching_started, Toast.LENGTH_SHORT).show();
+        } else if (item.getItemId() == R.id.menu_item_cancel_caching) {
+            PlaylistCacheUi.cancelCaching(requireContext(), jobKey);
+        } else if (item.getItemId() == R.id.menu_item_remove_cached_audio) {
+            PlaylistCacheUi.confirmRemoveCachedAudio(requireActivity(), jobKey,
+                    name == null ? "" : name);
+        } else if (item.getItemId() == R.id.menu_item_play_cached) {
+            PlaylistCacheUi.playCached(requireContext(), jobKey);
         } else {
             return super.onOptionsItemSelected(item);
         }

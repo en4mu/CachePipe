@@ -34,4 +34,28 @@
         android:orderInCategory="3"
         android:title="@string/add_to_playlist"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_cache_playlist"
+        android:orderInCategory="4"
+        android:title="@string/cache_playlist"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_cancel_caching"
+        android:orderInCategory="5"
+        android:title="@string/cancel_caching"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_remove_cached_audio"
+        android:orderInCategory="6"
+        android:title="@string/remove_cached_audio"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_play_cached"
+        android:orderInCategory="7"
+        android:title="@string/play_cached"
+        app:showAsAction="never" />
 </menu>

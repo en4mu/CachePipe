@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,6 +47,8 @@ import org.schabi.newpipe.info_list.dialog.StreamDialogDefaultEntry;
 import org.schabi.newpipe.local.dialog.PlaylistDialog;
 import org.schabi.newpipe.local.playlist.RemotePlaylistManager;
 import org.schabi.newpipe.player.playqueue.PlayQueue;
+import org.schabi.newpipe.playlistcache.PlaylistCacheScheduler;
+import org.schabi.newpipe.playlistcache.PlaylistCacheUi;
 import org.schabi.newpipe.player.playqueue.PlaylistPlayQueue;
 import org.schabi.newpipe.util.ExtractorHelper;
 import org.schabi.newpipe.util.Localization;
@@ -252,6 +255,20 @@ public class PlaylistFragment extends BaseListInfoFragment<StreamInfoItem, Playl
                         dialog -> dialog.show(getFM(), TAG)
                 ));
             }
+        } else if (itemId == R.id.menu_item_cache_playlist) {
+            PlaylistCacheScheduler.enqueueRemote(requireContext(), serviceId, url,
+                    name == null ? "" : name, null, false);
+            Toast.makeText(requireContext(), R.string.caching_started, Toast.LENGTH_SHORT).show();
+        } else if (itemId == R.id.menu_item_cancel_caching) {
+            PlaylistCacheUi.cancelCaching(requireContext(),
+                    PlaylistCacheScheduler.remoteJobKey(serviceId, url));
+        } else if (itemId == R.id.menu_item_remove_cached_audio) {
+            PlaylistCacheUi.confirmRemoveCachedAudio(requireActivity(),
+                    PlaylistCacheScheduler.remoteJobKey(serviceId, url),
+                    name == null ? "" : name);
+        } else if (itemId == R.id.menu_item_play_cached) {
+            PlaylistCacheUi.playCached(requireContext(),
+                    PlaylistCacheScheduler.remoteJobKey(serviceId, url));
         } else {
             return super.onOptionsItemSelected(item);
         }
