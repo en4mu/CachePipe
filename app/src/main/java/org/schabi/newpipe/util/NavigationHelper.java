@@ -170,6 +170,28 @@ public final class NavigationHelper {
         ContextCompat.startForegroundService(context, intent);
     }
 
+    /**
+     * Starts a background player queue from its first item at position zero.
+     *
+     * <p>This is used by the explicit Play cached action. It must not resume a saved history
+     * position and must not keep the current position of an already-playing identical queue.</p>
+     *
+     * @param context the Android context used to start the player service
+     * @param queue   the cached playlist queue to start
+     */
+    public static void playOnBackgroundPlayerFromStart(final Context context,
+                                                       final PlayQueue queue) {
+        Toast.makeText(context, R.string.background_player_playing_toast, Toast.LENGTH_SHORT)
+                .show();
+
+        final Intent intent = getPlayerIntent(context, PlayerService.class, queue,
+                PlayerIntentType.AllOthers)
+                .putExtra(Player.PLAYER_TYPE, PlayerType.AUDIO)
+                .putExtra(Player.RESUME_PLAYBACK, false)
+                .putExtra(Player.START_FROM_ZERO, true);
+        ContextCompat.startForegroundService(context, intent);
+    }
+
     /* ENQUEUE */
     public static void enqueueOnPlayer(final Context context,
                                        final PlayQueue queue,

@@ -97,10 +97,9 @@ object PlaylistCacheUi {
                     thumbnails = ImageStrategy.dbUrlToImageList(track.thumbnailUrl)
                 }
             }
-            NavigationHelper.playOnBackgroundPlayer(
+            NavigationHelper.playOnBackgroundPlayerFromStart(
                 context,
-                SinglePlayQueue(items, 0),
-                true
+                SinglePlayQueue(items, 0)
             )
         }
     }

@@ -165,6 +165,7 @@ public final class Player implements PlaybackListener, Listener {
     public static final String PLAYBACK_QUALITY = "playback_quality";
     public static final String PLAY_QUEUE_KEY = "play_queue_key";
     public static final String RESUME_PLAYBACK = "resume_playback";
+    public static final String START_FROM_ZERO = "start_from_zero";
     public static final String PLAY_WHEN_READY = "play_when_ready";
     public static final String PLAYER_TYPE = "player_type";
     public static final String PLAYER_INTENT_TYPE = "player_intent_type";
@@ -468,6 +469,11 @@ public final class Player implements PlaybackListener, Listener {
             return;
         }
 
+        final boolean startFromZero = intent.getBooleanExtra(START_FROM_ZERO, false);
+        if (startFromZero) {
+            newQueue.unsetRecovery(newQueue.getIndex());
+        }
+
         // branching parameters for below
         final boolean samePlayQueue = playQueue != null && playQueue.equalStreamsAndIndex(newQueue);
 
@@ -480,8 +486,16 @@ public final class Player implements PlaybackListener, Listener {
          * In those cases time will be saved because re-init of the play queue is a not an instant
          *  task and requires network calls
          * */
-        // seek to timestamp if stream is already playing
-        if (!exoPlayerIsNull()
+        if (startFromZero && !exoPlayerIsNull() && samePlayQueue
+                && playQueue != null && !playQueue.isDisposed()) {
+            // Restart the current queue from its first item and position zero.
+            if (simpleExoPlayer.getPlaybackState()
+                    == com.google.android.exoplayer2.Player.STATE_IDLE) {
+                simpleExoPlayer.prepare();
+            }
+            simpleExoPlayer.seekTo(newQueue.getIndex(), 0);
+            simpleExoPlayer.setPlayWhenReady(playWhenReady);
+        } else if (!exoPlayerIsNull()
                 && newQueue.size() == 1 && newQueue.getItem() != null
                 && playQueue != null && playQueue.size() == 1 && playQueue.getItem() != null
                 && newQueue.getItem().isSameItem(playQueue.getItem())
